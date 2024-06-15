@@ -1,0 +1,4 @@
+@baseUrl=http://localhost:3000
+
+### Get Air Quality 
+GET {{baseUrl}}/air-quality?latitude=48.856613&logngitude=2.352222
