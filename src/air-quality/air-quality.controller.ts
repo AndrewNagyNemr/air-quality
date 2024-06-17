@@ -14,9 +14,9 @@ export class AirQualityController {
     return this.airQualityService.mapGetAirQualityResponse(aitQualityData);
   }
 
-  @Get("/most-polluted-paris")
+  @Get('/most-polluted-paris')
   async getMostPollutedTimeParis() {
     const aitQualityData = await this.airQualityService.getMostPollutedParis();
-    return aitQualityData?.current.pollution.ts
+    return aitQualityData?.current.pollution.ts;
   }
 }

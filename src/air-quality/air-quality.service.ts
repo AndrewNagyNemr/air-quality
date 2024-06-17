@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { GetAirQualityResponse } from './types';
@@ -33,25 +37,55 @@ export class AirQualityService {
     lat: string;
     lon: string;
   }): Promise<GetAirQualityResponse> {
-    const { data } = await axios.get<GetAirQualityResponse>(
-      '/v2/nearest_city',
-      {
-        baseURL: this.airVisualBaseUrl,
-        params: {
-          lat,
-          lon,
-          key: this.airVisualAPIKey,
+    try {
+      const { data } = await axios.get<GetAirQualityResponse>(
+        '/v2/nearest_city',
+        {
+          baseURL: this.airVisualBaseUrl,
+          params: {
+            lat,
+            lon,
+            key: this.airVisualAPIKey,
+          },
         },
-      },
-    );
-    return data;
+      );
+      return data;
+    } catch (error) {
+      console.error('Error fetching air quality data:', error);
+      throw new InternalServerErrorException(
+        'Failed to fetch air quality data',
+      );
+    }
   }
 
   async createAirQualityRecord(airQuality: GetAirQualityResponse) {
-    await new this.AirQualityModel(airQuality.data).save();
+    try {
+      await new this.AirQualityModel(airQuality.data).save();
+    } catch (error) {
+      console.error('Error creating air quality record:', error);
+      throw new InternalServerErrorException(
+        'Failed to create air quality record',
+      );
+    }
   }
 
-  getMostPollutedParis() {
-    return this.AirQualityModel.findOne().sort({ 'current.pollution.aqius': -1 });
+  async getMostPollutedParis() {
+    try {
+      const result = await this.AirQualityModel.findOne()
+        .sort({ 'current.pollution.aqius': -1 })
+        .exec();
+      if (!result) {
+        throw new NotFoundException('No air quality records found');
+      }
+      return result;
+    } catch (error) {
+      console.error('Error fetching most polluted time:', error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Failed to fetch most polluted time',
+      );
+    }
   }
 }
