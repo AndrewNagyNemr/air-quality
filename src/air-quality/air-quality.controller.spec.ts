@@ -20,13 +20,7 @@ describe('AirQualityController', () => {
         },
         {
           provide: getModelToken(AirQuality.name),
-          useValue: {
-            findOne: jest.fn().mockReturnThis(),
-            sort: jest.fn().mockReturnThis(),
-            save: jest.fn(),
-            exec: jest.fn(),
-            create: jest.fn().mockReturnThis(),
-          },
+          useValue: {},
         },
         AirQualityService,
       ],
