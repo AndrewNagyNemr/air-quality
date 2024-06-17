@@ -2,3 +2,6 @@
 
 ### Get Air Quality 
 GET {{baseUrl}}/air-quality?lat=48.856613&lon=2.352222
+
+### Get Most Polluted Time
+GET {{baseUrl}}/air-quality/most-polluted-paris?lat=48.856613&lon=2.352222

@@ -50,4 +50,8 @@ export class AirQualityService {
   async createAirQualityRecord(airQuality: GetAirQualityResponse) {
     await new this.AirQualityModel(airQuality.data).save();
   }
+
+  getMostPollutedParis() {
+    return this.AirQualityModel.findOne().sort({ 'current.pollution.aqius': -1 });
+  }
 }
