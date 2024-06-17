@@ -60,7 +60,7 @@ export class AirQualityService {
 
   async createAirQualityRecord(airQuality: GetAirQualityResponse) {
     try {
-      await new this.AirQualityModel(airQuality.data).save();
+      await this.AirQualityModel.create(airQuality.data);
     } catch (error) {
       console.error('Error creating air quality record:', error);
       throw new InternalServerErrorException(
