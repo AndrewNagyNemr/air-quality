@@ -6,10 +6,11 @@ export class AirQualityController {
   constructor(private readonly airQualityService: AirQualityService) {}
 
   @Get()
-  getAirQuality(
-    @Query('latitude') latitude: string,
-    @Query('logngitude') logngitude: string,
-  ) {
-    return this.airQualityService.getAirQuality({ latitude, logngitude });
+  async getAirQuality(@Query('lat') lat: string, @Query('lon') lon: string) {
+    const aitQualityData = await this.airQualityService.getAirQuality({
+      lat,
+      lon,
+    });
+    return this.airQualityService.mapGetAirQualityResponse(aitQualityData);
   }
 }

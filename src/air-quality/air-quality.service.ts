@@ -2,38 +2,52 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { GetAirQualityResponse } from './types';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { AirQuality } from './schemas/air-quality.schema';
 
 @Injectable()
 export class AirQualityService {
   airVisualBaseUrl: string;
   airVisualAPIKey: string;
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    @InjectModel(AirQuality.name) private AirQualityModel: Model<AirQuality>,
+  ) {
     this.airVisualBaseUrl = configService.getOrThrow('AIR_VISUAL_BASE_URL');
     this.airVisualAPIKey = configService.getOrThrow('AIR_VISUAL_API_KEY');
   }
 
-  private mapGetAirQualityResponse(response: GetAirQualityResponse) {
+  mapGetAirQualityResponse(response: GetAirQualityResponse) {
     return {
       Result: {
-        Polution: response.data.current.pollution
+        Polution: response.data.current.pollution,
       },
     };
   }
 
   async getAirQuality({
-    latitude,
-    logngitude,
+    lat,
+    lon,
   }: {
-    latitude: string;
-    logngitude: string;
-  }) {
-    // console.log(AIR_VISUAL_API_KEY);
-    console.log(this.airVisualAPIKey);
-
+    lat: string;
+    lon: string;
+  }): Promise<GetAirQualityResponse> {
     const { data } = await axios.get<GetAirQualityResponse>(
-      // `${this.airVisualBaseUrl}/v2/nearest_city?lat=${latitude}}&lon=${logngitude}?key=${this.airVisualAPIKey}`,
-      'https://api.airvisual.com/v2/nearest_city?lat=48.856613&lon=2.352222&key=a8bb2e31-e86b-4999-b1aa-2aad531f69c9',
+      '/v2/nearest_city',
+      {
+        baseURL: this.airVisualBaseUrl,
+        params: {
+          lat,
+          lon,
+          key: this.airVisualAPIKey,
+        },
+      },
     );
-    return this.mapGetAirQualityResponse(data);
+    return data;
+  }
+
+  async createAirQualityRecord(airQuality: GetAirQualityResponse) {
+    await new this.AirQualityModel(airQuality.data).save();
   }
 }
